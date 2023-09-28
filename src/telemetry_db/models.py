@@ -9,13 +9,13 @@ class Type(Enum):
 
 
 class Unit(Enum):
-    T = "T"
+    C = "C"
     F = "F"
 
 
 # for now, validation is not conditional, as telemetry DB contains just one type of measurement: "temp"
 # eventually, might want conditions, e.g. for type="temp", allowed units are ["T", "F"], while for
-# type="humidity", allowed units are
+# type="humidity", allowed units are ["percent", "gm^-3"]
 class TelemetryEntry(BaseModel):
     timestamp: datetime.datetime
     type: Type

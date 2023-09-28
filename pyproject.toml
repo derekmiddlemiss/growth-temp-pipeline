@@ -8,11 +8,14 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.9"
 pydantic = "^2.4.0"
+pyodbc = "^4.0.39"
+python-decouple = "^3.8"
 
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.2"
 pre-commit = "^3.4.0"
+coverage = "^7.3.1"
 
 [tool.black]
 line-length = 79
@@ -31,6 +34,7 @@ exclude = '''
 )/
 '''
 
+[tool.poetry_bumpversion.file."src/__init__.py"]
 
 [build-system]
 requires = ["poetry-core"]
