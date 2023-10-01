@@ -2,6 +2,7 @@ import datetime
 import logging
 from collections.abc import Generator
 
+import backoff
 import pyodbc
 from pydantic import ValidationError
 
@@ -22,6 +23,7 @@ logger = logging.getLogger(__name__)
 #                              microsecond=math.floor(tup[6] / 1000.0 + 0.5))
 
 
+@backoff.on_exception(backoff.expo, pyodbc.Error, max_tries=3)
 def get_cursor() -> pyodbc.Cursor:
     # sudo apt install unixodbc
     # curl https://packages.microsoft.com/keys/microsoft.asc | sudo tee /etc/apt/trusted.gpg.d/microsoft.asc
@@ -29,7 +31,6 @@ def get_cursor() -> pyodbc.Cursor:
     # sudo apt-get update
     # sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18
     # TODO @dsm alpine setup at https://learn.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server
-    # TODO @dsm turning off SSL encryption here not ideal - hopefully won't be an issue on Alpine
     connection_string = (
         f"DRIVER={{ODBC Driver 18 for SQL Server}};"
         f"SERVER={config('TELEMETRY_DB_HOST')},{config('TELEMETRY_DB_PORT', cast=int)};"
@@ -45,9 +46,7 @@ def get_cursor() -> pyodbc.Cursor:
         logger.info("Connected to telemetry DB.")
         return connection.cursor()
     except pyodbc.Error as e:
-        logger.error(
-            f"Could not connect to telemetry DB. Error: {e}", stack_info=True
-        )
+        logger.error(f"Could not connect to telemetry DB. Error: {e}")
         raise e
 
 
@@ -68,8 +67,7 @@ def get_row_count(
         ).fetchone()[0]
     except pyodbc.Error as e:
         logger.error(
-            f"Could not fetch row count from telemetry DB. Error: {e}",
-            stack_info=True,
+            f"Could not fetch row count from telemetry DB. Error: {e}"
         )
         raise e
 
@@ -119,8 +117,7 @@ def telemetry_entries_batcher(
             ]
         except pyodbc.Error as e:
             logger.error(
-                f"Error: {e} fetching batch from telemetry DB. Batches fetched={num_batches_fetched}",
-                stack_info=True,
+                f"Error: {e} fetching batch from telemetry DB. Batches fetched={num_batches_fetched}"
             )
             raise e
         try:
@@ -129,8 +126,7 @@ def telemetry_entries_batcher(
             ]
         except ValidationError as e:
             logger.error(
-                f"Error: {e} validating telemetry DB rows. Batches fetched={num_batches_fetched}",
-                stack_info=True,
+                f"Error: {e} validating telemetry DB rows. Batches fetched={num_batches_fetched}"
             )
             raise e
 
@@ -139,5 +135,4 @@ def telemetry_entries_batcher(
         logger.debug(
             f"Batch number={num_batches_fetched}, rows_in_batch={len(entries)}"
         )
-
         yield entries

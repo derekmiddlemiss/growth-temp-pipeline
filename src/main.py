@@ -1,14 +1,19 @@
 import datetime
-import os
 
 from logger import setup_logger
 from src.config import config
-from src.telemetry_db.models import MeasurementUnit, MeasurementType
-from telemetry_db.db import telemetry_entries_batcher
-from yield_tsv_reader.yield_results import yield_results_batcher
+from growth_job_api import get_growth_jobs
+from telemetry_db import (
+    MeasurementUnit,
+    MeasurementType,
+    telemetry_entries_batcher,
+)
+from yield_tsv_reader import yield_results_batcher
 
 if __name__ == "__main__":
     setup_logger()
+
+    growth_jobs = get_growth_jobs()
 
     yield_batches = yield_results_batcher(batch_size=2)
     for batch in yield_batches:
