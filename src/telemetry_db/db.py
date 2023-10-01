@@ -36,7 +36,8 @@ def get_cursor() -> pyodbc.Cursor:
         f"DATABASE={config('TELEMETRY_DB_NAME')};"
         f"UID={config('TELEMETRY_DB_USERNAME')};"
         f"PWD={config('TELEMETRY_DB_PASSWORD')};"
-        "Encrypt=no"
+        "Encrypt=yes;"
+        "TrustServerCertificate=yes"
     )
     try:
         connection = pyodbc.connect(connection_string)
@@ -73,7 +74,7 @@ def get_row_count(
         raise e
 
 
-def telemetry_entries_since_timestamp_batcher(
+def telemetry_entries_batcher(
     type_to_fetch: MeasurementType,
     unit_to_fetch: MeasurementUnit,
     since_timestamp: datetime.datetime | None = None,
