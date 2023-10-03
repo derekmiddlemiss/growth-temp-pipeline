@@ -1,14 +1,14 @@
 import datetime
 
-from logger import setup_logger
-from src.config import config
-from growth_job_api import get_growth_jobs
-from telemetry_db import (
+from growth_job_pipeline.config import config
+from growth_job_pipeline.growth_job_api import get_growth_jobs
+from growth_job_pipeline.logger import setup_logger
+from growth_job_pipeline.telemetry_db import (
     MeasurementUnit,
     MeasurementType,
     telemetry_entries_batcher,
 )
-from yield_tsv_reader import yield_results_batcher
+from growth_job_pipeline.yield_tsv_reader import yield_results_batcher
 
 if __name__ == "__main__":
     setup_logger()

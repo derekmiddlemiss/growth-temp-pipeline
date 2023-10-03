@@ -4,8 +4,8 @@ from typing import TextIO
 
 from pydantic import ValidationError
 
-from src.config import config
-from src.yield_tsv_reader.models import YieldResult
+from growth_job_pipeline.config import config
+from growth_job_pipeline.yield_tsv_reader.models import YieldResult
 
 logger = logging.getLogger(__name__)
 

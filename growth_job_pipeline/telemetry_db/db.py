@@ -6,8 +6,8 @@ import backoff
 import pyodbc
 from pydantic import ValidationError
 
-from src.config import config
-from src.telemetry_db.models import (
+from growth_job_pipeline.config import config
+from growth_job_pipeline.telemetry_db.models import (
     TelemetryEntry,
     MeasurementUnit,
     MeasurementType,

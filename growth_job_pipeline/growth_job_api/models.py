@@ -1,7 +1,7 @@
 import datetime
 from pydantic import BaseModel, Extra, model_validator, StrictInt
 
-from src.shared_models import Crop
+from growth_job_pipeline.shared_models import Crop
 
 
 class GrowthJob(BaseModel):

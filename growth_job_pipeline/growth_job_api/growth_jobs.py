@@ -5,7 +5,7 @@ import backoff
 import pydantic
 import requests
 
-from src.config import config
+from growth_job_pipeline.config import config
 from .models import GrowthJob
 
 logger = logging.getLogger(__name__)

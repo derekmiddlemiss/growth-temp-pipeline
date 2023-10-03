@@ -1,5 +1,5 @@
 import logging
-from src.config import config
+from growth_job_pipeline.config import config
 
 
 def setup_logger():
