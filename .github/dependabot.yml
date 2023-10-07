@@ -1,0 +1,12 @@
+version: 2
+updates:
+- package-ecosystem: pip
+  directory: "/"
+  target-branch: main
+  open-pull-requests-limit: 3
+  schedule:
+    interval: weekly
+  groups:
+    python-packages:
+      patterns:
+        - "*"

@@ -1,4 +1,4 @@
-import datetime
+import logging
 
 from growth_job_pipeline.config import config
 from growth_job_pipeline.growth_job_api import get_growth_jobs
@@ -8,28 +8,39 @@ from growth_job_pipeline.telemetry_db import (
     MeasurementType,
     telemetry_entries_batcher,
 )
-from growth_job_pipeline.yield_tsv_reader import yield_results_batcher
+from growth_job_pipeline.telemetry_db.db import get_cursor
+from growth_job_pipeline.utils import (
+    get_config_timestamps,
+    coalesce_run_timestamps,
+)
+from growth_job_pipeline.yield_tsv_reader import get_yield_results
+
+logger = logging.getLogger(__name__)
+
 
 if __name__ == "__main__":
     setup_logger()
 
-    growth_jobs = get_growth_jobs()
+    run_timestamps = get_config_timestamps()
+    coalesced_timestamps = coalesce_run_timestamps(run_timestamps)
 
-    yield_batches = yield_results_batcher(batch_size=2)
-    for batch in yield_batches:
-        print("YB", len(batch))
+    from_timestamp = coalesced_timestamps.from_timestamp
+    to_timestamp = coalesced_timestamps.to_timestamp
 
+    yield_results = get_yield_results(from_timestamp, to_timestamp)
+
+    growth_jobs = get_growth_jobs(from_timestamp, to_timestamp)
+    yield_results = get_yield_results(from_timestamp, to_timestamp)
+
+    cursor = get_cursor()
     telemetry_batches = telemetry_entries_batcher(
+        cursor=cursor,
         type_to_fetch=MeasurementType(config("MEASUREMENT_TYPE")),
         unit_to_fetch=MeasurementUnit(config("MEASUREMENT_UNIT")),
         batch_size=config("TELEMETRY_DB_BATCH_SIZE", cast=int),
-        since_timestamp=config(
-            "SINCE_TIMESTAMP",
-            default=None,
-            cast=lambda x: None
-            if x is None
-            else datetime.datetime.fromisoformat(x),
-        ),
+        from_timestamp=from_timestamp,
+        to_timestamp=to_timestamp,
     )
+
     for batch in telemetry_batches:
         print("TB", len(batch))

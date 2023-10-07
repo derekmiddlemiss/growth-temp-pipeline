@@ -1,1 +1,1 @@
-from .yield_results import yield_results_batcher
+from .yield_results import get_yield_results

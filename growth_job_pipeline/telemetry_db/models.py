@@ -17,6 +17,10 @@ class MeasurementUnit(str, Enum):
 # eventually, might want conditions, e.g. for measurement_type="temp", allowed measurement_units are ["T", "F"],
 # while for measurement_type="humidity", allowed measurement_units are ["percent", "gm^-3"]
 class TelemetryEntry(BaseModel):
+    """
+    Represents a telemetry database entry. Immutable.
+    """
+
     timestamp: datetime.datetime
     type: MeasurementType
     value: float
@@ -25,3 +29,4 @@ class TelemetryEntry(BaseModel):
     class Config:
         use_enum_values = True
         extra = Extra.forbid
+        allow_mutation = False

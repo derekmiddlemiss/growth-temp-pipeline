@@ -18,6 +18,7 @@ requests = "^2.31.0"
 pytest = "^7.4.2"
 pre-commit = "^3.4.0"
 coverage = "^7.3.1"
+pytest-mock = "^3.11.1"
 
 [tool.black]
 line-length = 79

@@ -1,6 +1,7 @@
 import datetime
 import logging
 from collections.abc import Generator
+from typing import Iterable
 
 import backoff
 import pyodbc
@@ -16,15 +17,12 @@ from growth_job_pipeline.telemetry_db.models import (
 logger = logging.getLogger(__name__)
 
 
-# def handle_datetime2(dt2_value: bytes) -> datetime.datetime:
-#     tup = struct.unpack("<6hI", dt2_value)
-#     return datetime.datetime(tup[0], tup[1], tup[2],
-#                              hour=tup[3], minute=tup[4], second=tup[5],
-#                              microsecond=math.floor(tup[6] / 1000.0 + 0.5))
-
-
 @backoff.on_exception(backoff.expo, pyodbc.Error, max_tries=3)
 def get_cursor() -> pyodbc.Cursor:
+    """
+    Returns a cursor for the telemetry DB
+    :return: pyodbc.Cursor
+    """
     # sudo apt install unixodbc
     # curl https://packages.microsoft.com/keys/microsoft.asc | sudo tee /etc/apt/trusted.gpg.d/microsoft.asc
     # curl https://packages.microsoft.com/config/ubuntu/22.04/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
@@ -42,7 +40,6 @@ def get_cursor() -> pyodbc.Cursor:
     )
     try:
         connection = pyodbc.connect(connection_string)
-        # connection.add_output_converter(pyodbc.SQL_TYPE_TIMESTAMP, handle_datetime2)
         logger.info("Connected to telemetry DB.")
         return connection.cursor()
     except pyodbc.Error as e:
@@ -52,18 +49,19 @@ def get_cursor() -> pyodbc.Cursor:
 
 def get_row_count(
     cursor: pyodbc.Cursor,
-    query_timestamp: datetime.datetime,
+    from_timestamp: datetime.datetime,
+    to_timestamp: datetime.datetime,
     type_to_fetch: MeasurementType,
     unit_to_fetch: MeasurementUnit,
 ) -> int:
     query = """
         SELECT COUNT(*)
         FROM dbo.telemetry
-        WHERE timestamp >= ? AND type = ? AND unit = ?
+        WHERE timestamp >= ? AND timestamp <= ? AND type = ? AND unit = ?
     """
     try:
         return cursor.execute(
-            query, (query_timestamp, type_to_fetch, unit_to_fetch)
+            query, (from_timestamp, to_timestamp, type_to_fetch, unit_to_fetch)
         ).fetchone()[0]
     except pyodbc.Error as e:
         logger.error(
@@ -72,23 +70,35 @@ def get_row_count(
         raise e
 
 
+def get_validated_entries(
+    column_names: list[str], rows: list[Iterable], num_batches_fetched: int
+) -> list[TelemetryEntry]:
+    try:
+        return [TelemetryEntry(**dict(zip(column_names, row))) for row in rows]
+    except ValidationError as e:
+        logger.error(
+            f"Error: {e} validating telemetry DB rows. Batches fetched={num_batches_fetched}"
+        )
+        raise e
+
+
 def telemetry_entries_batcher(
+    cursor: pyodbc.Cursor,
     type_to_fetch: MeasurementType,
     unit_to_fetch: MeasurementUnit,
-    since_timestamp: datetime.datetime | None = None,
+    from_timestamp: datetime.datetime,
+    to_timestamp: datetime.datetime,
     batch_size=1000,
 ) -> Generator[list[TelemetryEntry], None, None]:
-    cursor = get_cursor()
-    if since_timestamp is None:
-        query_timestamp = datetime.datetime.min
-    else:
-        query_timestamp = since_timestamp
-
     row_count = get_row_count(
-        cursor, query_timestamp, type_to_fetch, unit_to_fetch
+        cursor=cursor,
+        from_timestamp=from_timestamp,
+        to_timestamp=to_timestamp,
+        type_to_fetch=type_to_fetch,
+        unit_to_fetch=unit_to_fetch,
     )
     logger.info(
-        f"{row_count} rows to fetch since timestamp={since_timestamp} "
+        f"{row_count} rows to fetch from timestamp={from_timestamp} to timestamp={to_timestamp} "
         f"for type={type_to_fetch.value}, unit={unit_to_fetch.value}"
     )
 
@@ -97,7 +107,7 @@ def telemetry_entries_batcher(
         query = """
             SELECT *
             FROM dbo.telemetry
-            WHERE timestamp >= ? AND type = ? AND unit = ?
+            WHERE timestamp >= ? AND timestamp <= ? AND type = ? AND unit = ?
             ORDER BY (SELECT NULL)
             OFFSET ? ROWS FETCH FIRST ? ROWS ONLY;
         """
@@ -105,7 +115,8 @@ def telemetry_entries_batcher(
             rows = cursor.execute(
                 query,
                 (
-                    query_timestamp,
+                    from_timestamp,
+                    to_timestamp,
                     type_to_fetch,
                     unit_to_fetch,
                     num_batches_fetched * batch_size,
@@ -120,16 +131,10 @@ def telemetry_entries_batcher(
                 f"Error: {e} fetching batch from telemetry DB. Batches fetched={num_batches_fetched}"
             )
             raise e
-        try:
-            entries = [
-                TelemetryEntry(**dict(zip(column_names, row))) for row in rows
-            ]
-        except ValidationError as e:
-            logger.error(
-                f"Error: {e} validating telemetry DB rows. Batches fetched={num_batches_fetched}"
-            )
-            raise e
 
+        entries = get_validated_entries(
+            column_names, rows, num_batches_fetched
+        )
         num_batches_fetched += 1
         row_count -= len(entries)
         logger.debug(
