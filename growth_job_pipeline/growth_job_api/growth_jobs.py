@@ -48,7 +48,10 @@ def get_time_filtered_growth_jobs_for_crop(
             and job.crop == crop
         ]
         logger.info(
-            f"Fetched {len(filtered_jobs)} from {config('GROWTH_JOBS_API_URL')} from timestamp={from_timestamp} to timestamp={to_timestamp} for crop={crop}"
+            f"Fetched {len(filtered_jobs)} from"
+            f" {config('GROWTH_JOBS_API_URL')} from"
+            f" timestamp={from_timestamp} to timestamp={to_timestamp} for"
+            f" crop={crop}"
         )
         return filtered_jobs
     except pydantic.ValidationError as e:

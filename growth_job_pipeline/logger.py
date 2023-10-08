@@ -7,5 +7,8 @@ def setup_logger():
     logging.getLogger("backoff").addHandler(logging.StreamHandler())
     logging.basicConfig(
         level=log_level,
-        format="[%(asctime)s] %(levelname)s [module=%(name)s, line=%(lineno)s] %(message)s",
+        format=(
+            "[%(asctime)s] %(levelname)s [module=%(name)s, line=%(lineno)s]"
+            " %(message)s"
+        ),
     )

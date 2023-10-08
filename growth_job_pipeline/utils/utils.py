@@ -54,7 +54,10 @@ def coalesce_run_timestamps(
     if to_timestamp is None:
         to_timestamp = datetime.datetime.max
     if to_timestamp <= from_timestamp:
-        msg = f"to_timestamp={to_timestamp} less than or equal to from_timestamp={from_timestamp}"
+        msg = (
+            f"to_timestamp={to_timestamp} less than or equal to"
+            f" from_timestamp={from_timestamp}"
+        )
         logger.error(msg)
         raise ValueError(msg)
     return CoalescedTimestamps(

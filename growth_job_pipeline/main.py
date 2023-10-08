@@ -124,7 +124,12 @@ def match_yield_results_growth_jobs_gen_specs(
                 crop=this_yield_result.crop,
             )
             if len(candidate_growth_jobs) != 1:
-                msg = f"Cannot unambiguously assign yield result={this_yield_result} to a single growth job. Num growth jobs found since last yield result={len(candidate_growth_jobs)}"
+                msg = (
+                    "Cannot unambiguously assign yield"
+                    f" result={this_yield_result} to a single growth job. Num"
+                    " growth jobs found since last yield"
+                    f" result={len(candidate_growth_jobs)}"
+                )
                 logger.error(msg)
                 raise RuntimeError(msg)
             job_to_output_rows_spec = create_job_to_output_rows_spec(
@@ -146,7 +151,12 @@ def match_yield_results_growth_jobs_gen_specs(
                 crop=this_yield_result.crop,
             )
             if len(candidate_growth_jobs) != 1:
-                msg = f"Cannot unambiguously assign yield result={this_yield_result} to a single growth job. Num growth jobs found since last yield result={len(candidate_growth_jobs)}"
+                msg = (
+                    "Cannot unambiguously assign yield"
+                    f" result={this_yield_result} to a single growth job. Num"
+                    " growth jobs found since last yield"
+                    f" result={len(candidate_growth_jobs)}"
+                )
                 logger.error(msg)
                 raise RuntimeError(msg)
             job_to_output_rows_spec = create_job_to_output_rows_spec(
@@ -311,7 +321,10 @@ def main() -> None:
     )
 
     if not job_to_output_rows_specs:
-        msg = f"No matched yield results and growth jobs found for timestamp range {from_timestamp} to {to_timestamp}"
+        msg = (
+            "No matched yield results and growth jobs found for timestamp"
+            f" range {from_timestamp} to {to_timestamp}"
+        )
         logger.warning(msg)
         exit(0)
 

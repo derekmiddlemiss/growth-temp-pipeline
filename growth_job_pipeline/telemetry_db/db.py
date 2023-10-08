@@ -30,7 +30,7 @@ def get_telemetry_db_cursor() -> pyodbc.Cursor:
     # sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18
     # TODO @dsm alpine setup at https://learn.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server
     connection_string = (
-        f"DRIVER={{ODBC Driver 18 for SQL Server}};"
+        "DRIVER={ODBC Driver 18 for SQL Server};"
         f"SERVER={config('TELEMETRY_DB_HOST')},{config('TELEMETRY_DB_PORT', cast=int)};"
         f"DATABASE={config('TELEMETRY_DB_NAME')};"
         f"UID={config('TELEMETRY_DB_USERNAME')};"
@@ -77,7 +77,8 @@ def get_validated_entries(
         return [TelemetryEntry(**dict(zip(column_names, row))) for row in rows]
     except ValidationError as e:
         logger.error(
-            f"Error: {e} validating telemetry DB rows. Batches fetched={num_batches_fetched}"
+            f"Error: {e} validating telemetry DB rows. Batches"
+            f" fetched={num_batches_fetched}"
         )
         raise e
 
@@ -98,8 +99,9 @@ def telemetry_entries_batcher(
         unit_to_fetch=unit_to_fetch,
     )
     logger.info(
-        f"{row_count} rows to fetch from timestamp={from_timestamp} to timestamp={to_timestamp} "
-        f"for type={type_to_fetch.value}, unit={unit_to_fetch.value}"
+        f"{row_count} rows to fetch from timestamp={from_timestamp} to"
+        f" timestamp={to_timestamp} for type={type_to_fetch.value},"
+        f" unit={unit_to_fetch.value}"
     )
 
     num_batches_fetched = 0
@@ -128,7 +130,8 @@ def telemetry_entries_batcher(
             ]
         except pyodbc.Error as e:
             logger.error(
-                f"Error: {e} fetching batch from telemetry DB. Batches fetched={num_batches_fetched}"
+                f"Error: {e} fetching batch from telemetry DB. Batches"
+                f" fetched={num_batches_fetched}"
             )
             raise e
 
