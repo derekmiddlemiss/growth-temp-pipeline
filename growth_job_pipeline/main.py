@@ -194,27 +194,16 @@ def get_bounding_timestamps_for_specs(
     )
 
 
-def prepare_for_output(
-    run_id: UUID,
-    config_timestamps: ConfigTimestamps,
-    coalesced_timestamps: CoalescedTimestamps,
-    run_timestamp: datetime.datetime,
-    telemetry_type_to_fetch: TelemetryMeasurementType,
-    telemetry_unit_to_fetch: TelemetryMeasurementUnit,
-    job_to_output_rows_specs: list[JobToOutputRowsSpec],
+def setup_run_output_dir(
+    run_id: UUID, run_timestamp: datetime.datetime
 ) -> str:
     """
-    Creates output dir if it doesn't exist, returns run output dir path
-    Also creates run_data.json file in that dir
+    Creates run output dir and returns path
     :param run_id: UUID
-    :param config_timestamps: ConfigTimestamps
-    :param coalesced_timestamps: CoalescedTimestamps
     :param run_timestamp: datetime.datetime
-    :param telemetry_type_to_fetch: TelemetryMeasurementType
-    :param telemetry_unit_to_fetch: TelemetryMeasurementUnit
-    :param job_to_output_rows_specs: list[JobToOutputRowsSpec]
     :return: str
     """
+
     output_dir_path = config("OUTPUT_DIR")
     if not os.path.exists(output_dir_path):
         os.makedirs(output_dir_path)
@@ -227,6 +216,32 @@ def prepare_for_output(
         logger.error(msg)
         raise FileExistsError(msg)
     os.makedirs(run_output_dir_path)
+
+    return run_output_dir_path
+
+
+def write_run_data(
+    run_id: UUID,
+    run_output_dir_path: str,
+    config_timestamps: ConfigTimestamps,
+    coalesced_timestamps: CoalescedTimestamps,
+    run_timestamp: datetime.datetime,
+    telemetry_type_to_fetch: TelemetryMeasurementType,
+    telemetry_unit_to_fetch: TelemetryMeasurementUnit,
+    job_to_output_rows_specs: list[JobToOutputRowsSpec],
+) -> None:
+    """
+    Write run_data.json file in run_output_dir
+    :param run_id: UUID
+    :param run_output_dir_path: str
+    :param config_timestamps: ConfigTimestamps
+    :param coalesced_timestamps: CoalescedTimestamps
+    :param run_timestamp: datetime.datetime
+    :param telemetry_type_to_fetch: TelemetryMeasurementType
+    :param telemetry_unit_to_fetch: TelemetryMeasurementUnit
+    :param job_to_output_rows_specs: list[JobToOutputRowsSpec]
+    :return: None
+    """
 
     run_data = {
         "run_id": str(run_id),
@@ -251,8 +266,6 @@ def prepare_for_output(
         os.path.join(run_output_dir_path, f"run_data_{str(run_id)}.json"), "w"
     ) as file:
         file.write(json.dumps(run_data, indent=4))
-
-    return run_output_dir_path
 
 
 def telemetry_entry_to_output_rows(
@@ -290,9 +303,12 @@ def telemetry_entry_to_output_rows(
 
 
 def main() -> None:
-    setup_logger()
     run_id = uuid4()
     run_timestamp = datetime.datetime.now()
+    run_output_dir_path = setup_run_output_dir(
+        run_id=run_id, run_timestamp=run_timestamp
+    )
+    setup_logger(run_output_dir_path=run_output_dir_path, run_id=run_id)
     config_timestamps = get_config_timestamps()
     coalesced_timestamps = coalesce_run_timestamps(
         config_timestamps=config_timestamps
@@ -316,8 +332,9 @@ def main() -> None:
         to_timestamp=to_timestamp,
     )
 
-    output_dir_path = prepare_for_output(
+    write_run_data(
         run_id=run_id,
+        run_output_dir_path=run_output_dir_path,
         config_timestamps=config_timestamps,
         coalesced_timestamps=coalesced_timestamps,
         run_timestamp=run_timestamp,
@@ -349,7 +366,7 @@ def main() -> None:
     )
 
     output_file = os.path.join(
-        output_dir_path,
+        run_output_dir_path,
         f"data_{telemetry_type_to_fetch.value}_{telemetry_unit_to_fetch.value}_{str(run_id)}.csv",
     )
     if os.path.exists(output_file):
