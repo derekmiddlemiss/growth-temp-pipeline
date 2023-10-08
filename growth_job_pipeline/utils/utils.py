@@ -2,8 +2,10 @@ import datetime
 import logging
 
 from growth_job_pipeline.config import config
-from growth_job_pipeline.shared_models import (
+from growth_job_pipeline.shared_models.config_timestamps import (
     ConfigTimestamps,
+)
+from growth_job_pipeline.shared_models.coalesced_timestamps import (
     CoalescedTimestamps,
 )
 

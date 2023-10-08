@@ -1,13 +1,18 @@
 import datetime
 from pydantic import BaseModel, Extra, model_validator, StrictInt
 
-from growth_job_pipeline.shared_models import Crop
+from growth_job_pipeline.shared_models.crop import Crop
 
 
 class GrowthJob(BaseModel):
     """
     Represents a growth job. Immutable.
     Validated on creation to ensure end_date is after start_date if end_date is set
+    Attributes:
+        crop: Crop
+        start_date: datetime.datetime
+        end_date: datetime.datetime | None
+        id: StrictInt
     """
 
     crop: Crop
@@ -28,4 +33,4 @@ class GrowthJob(BaseModel):
     class Config:
         use_enum_values = True
         extra = Extra.forbid
-        allow_mutation = False
+        frozen = True

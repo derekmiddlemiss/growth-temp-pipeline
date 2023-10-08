@@ -10,15 +10,15 @@ from pydantic import ValidationError
 from growth_job_pipeline.config import config
 from growth_job_pipeline.telemetry_db.models import (
     TelemetryEntry,
-    MeasurementUnit,
-    MeasurementType,
+    TelemetryMeasurementUnit,
+    TelemetryMeasurementType,
 )
 
 logger = logging.getLogger(__name__)
 
 
 @backoff.on_exception(backoff.expo, pyodbc.Error, max_tries=3)
-def get_cursor() -> pyodbc.Cursor:
+def get_telemetry_db_cursor() -> pyodbc.Cursor:
     """
     Returns a cursor for the telemetry DB
     :return: pyodbc.Cursor
@@ -51,8 +51,8 @@ def get_row_count(
     cursor: pyodbc.Cursor,
     from_timestamp: datetime.datetime,
     to_timestamp: datetime.datetime,
-    type_to_fetch: MeasurementType,
-    unit_to_fetch: MeasurementUnit,
+    type_to_fetch: TelemetryMeasurementType,
+    unit_to_fetch: TelemetryMeasurementUnit,
 ) -> int:
     query = """
         SELECT COUNT(*)
@@ -84,8 +84,8 @@ def get_validated_entries(
 
 def telemetry_entries_batcher(
     cursor: pyodbc.Cursor,
-    type_to_fetch: MeasurementType,
-    unit_to_fetch: MeasurementUnit,
+    type_to_fetch: TelemetryMeasurementType,
+    unit_to_fetch: TelemetryMeasurementUnit,
     from_timestamp: datetime.datetime,
     to_timestamp: datetime.datetime,
     batch_size=1000,
@@ -108,7 +108,7 @@ def telemetry_entries_batcher(
             SELECT *
             FROM dbo.telemetry
             WHERE timestamp >= ? AND timestamp <= ? AND type = ? AND unit = ?
-            ORDER BY (SELECT NULL)
+            ORDER BY timestamp ASC
             OFFSET ? ROWS FETCH FIRST ? ROWS ONLY;
         """
         try:

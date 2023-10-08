@@ -1,1 +1,1 @@
-from .yield_results import get_yield_results
+from .yield_results import get_ascending_yield_results

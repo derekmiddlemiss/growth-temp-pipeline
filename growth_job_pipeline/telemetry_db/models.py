@@ -4,11 +4,11 @@ from enum import Enum
 from pydantic import BaseModel, Extra
 
 
-class MeasurementType(str, Enum):
+class TelemetryMeasurementType(str, Enum):
     temp = "temp"
 
 
-class MeasurementUnit(str, Enum):
+class TelemetryMeasurementUnit(str, Enum):
     C = "C"
     F = "F"
 
@@ -19,14 +19,19 @@ class MeasurementUnit(str, Enum):
 class TelemetryEntry(BaseModel):
     """
     Represents a telemetry database entry. Immutable.
+    Attributes:
+        timestamp: datetime.datetime
+        type: MeasurementType
+        value: float
+        unit: MeasurementUnit
     """
 
     timestamp: datetime.datetime
-    type: MeasurementType
+    type: TelemetryMeasurementType
     value: float
-    unit: MeasurementUnit
+    unit: TelemetryMeasurementUnit
 
     class Config:
         use_enum_values = True
         extra = Extra.forbid
-        allow_mutation = False
+        frozen = True

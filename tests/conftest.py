@@ -1,7 +1,10 @@
 import pytest
 import datetime
 
-from growth_job_pipeline.telemetry_db import MeasurementType, MeasurementUnit
+from growth_job_pipeline.telemetry_db import (
+    TelemetryMeasurementType,
+    TelemetryMeasurementUnit,
+)
 
 
 @pytest.fixture()
@@ -59,12 +62,12 @@ def invalid_to_timestamp__early() -> datetime.datetime:
 
 
 @pytest.fixture()
-def valid_measurement_type() -> MeasurementType:
+def valid_measurement_type() -> TelemetryMeasurementType:
     """
     Returns a valid measurement type
     :return: str
     """
-    return MeasurementType("temp")
+    return TelemetryMeasurementType("temp")
 
 
 @pytest.fixture()
@@ -77,12 +80,12 @@ def invalid_measurement_type() -> str:
 
 
 @pytest.fixture()
-def valid_measurement_unit() -> MeasurementUnit:
+def valid_measurement_unit() -> TelemetryMeasurementUnit:
     """
     Returns a valid measurement unit
     :return: str
     """
-    return MeasurementUnit("C")
+    return TelemetryMeasurementUnit("C")
 
 
 @pytest.fixture()

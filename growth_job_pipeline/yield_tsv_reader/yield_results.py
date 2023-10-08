@@ -4,7 +4,7 @@ import datetime
 from pydantic import ValidationError
 
 from growth_job_pipeline.config import config
-from growth_job_pipeline.utils import (
+from growth_job_pipeline.utils.utils import (
     split_line_on_whitespace,
     latest_datetime_possible_for_date,
 )
@@ -13,7 +13,7 @@ from growth_job_pipeline.yield_tsv_reader.models import YieldResult
 logger = logging.getLogger(__name__)
 
 
-def get_yield_results(
+def get_ascending_yield_results(
     from_timestamp: datetime.datetime, to_timestamp: datetime.datetime
 ) -> list[YieldResult]:
     """
@@ -35,10 +35,12 @@ def get_yield_results(
             logger.error(f"Error {e} validating yield results.")
             raise e
 
-        return [
+        filtered_results = [
             result
             for result in results
             if from_timestamp
             <= latest_datetime_possible_for_date(result.date)
             < to_timestamp
         ]
+
+        return sorted(filtered_results, key=lambda result: result.date)
