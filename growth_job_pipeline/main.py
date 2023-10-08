@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import csv
 import datetime
 import json
 import logging
@@ -11,6 +13,10 @@ from growth_job_pipeline.growth_job_api import (
     get_time_filtered_growth_jobs_for_crop,
 )
 from growth_job_pipeline.logger import setup_logger
+from growth_job_pipeline.shared_models.output_row import (
+    output_columns,
+    OutputRow,
+)
 from growth_job_pipeline.telemetry_db import (
     TelemetryMeasurementUnit,
     TelemetryMeasurementType,
@@ -52,6 +58,7 @@ def create_job_to_output_rows_spec(
     """
     return JobToOutputRowsSpec(
         crop=yield_result.crop,
+        growth_job_id=growth_job.id,
         growth_job_start_date=growth_job.start_date,
         growth_job_end_date=growth_job.end_date,
         yield_recorded_date=yield_result.date,
@@ -178,6 +185,7 @@ def prepare_for_output(
     run_timestamp: datetime.datetime,
     telemetry_type_to_fetch: TelemetryMeasurementType,
     telemetry_unit_to_fetch: TelemetryMeasurementUnit,
+    job_to_output_rows_specs: list[JobToOutputRowsSpec],
 ) -> str:
     """
     Creates output dir if it doesn't exist, returns run output dir path
@@ -188,6 +196,7 @@ def prepare_for_output(
     :param run_timestamp: datetime.datetime
     :param telemetry_type_to_fetch: TelemetryMeasurementType
     :param telemetry_unit_to_fetch: TelemetryMeasurementUnit
+    :param job_to_output_rows_specs: list[JobToOutputRowsSpec]
     :return: str
     """
     output_dir_path = config("OUTPUT_DIR")
@@ -213,6 +222,13 @@ def prepare_for_output(
         "max_days_delay_growth_job_yield_result": config(
             "MAX_DAYS_DELAY_GROWTH_JOB_YIELD_RESULT", cast=int
         ),
+        "num_yield_results": len(job_to_output_rows_specs),
+        "growth_job_ids_found_with_yields": [
+            spec.growth_job_id for spec in job_to_output_rows_specs
+        ],
+        "growth_job_crops_found_with_yields": [
+            spec.crop for spec in job_to_output_rows_specs
+        ],
     }
 
     with open(
@@ -224,13 +240,13 @@ def prepare_for_output(
 
 
 def telemetry_entry_to_output_rows(
-    output_file: TextIO,
+    dict_writer: csv.DictWriter,
     telemetry_entry: TelemetryEntry,
     job_to_output_rows_specs: list[JobToOutputRowsSpec],
 ) -> None:
     """
     Writes telemetry entry to output rows
-    :param output_file: TextIO
+    :param dict_writer: csv.DictWriter
     :param telemetry_entry: TelemetryEntry
     :param job_to_output_rows_specs: list[JobToOutputRowsSpec]
     :return: None
@@ -241,18 +257,20 @@ def telemetry_entry_to_output_rows(
             <= telemetry_entry.timestamp
             <= spec.growth_job_end_date
         ):
-            output_file.write(
-                f"{telemetry_entry.timestamp.isoformat()},"
-                f"{spec.crop},"
-                f"{spec.growth_job_start_date.isoformat()},"
-                f"{spec.growth_job_end_date.isoformat()},"
-                f"{spec.yield_recorded_date.isoformat()},"
-                f"{spec.yield_weight},"
-                f"{spec.yield_unit},"
-                f"{telemetry_entry.type},"
-                f"{telemetry_entry.unit},"
-                f"{telemetry_entry.value}\n"
+            output_row = OutputRow(
+                timestamp=telemetry_entry.timestamp,
+                crop=spec.crop,
+                growth_job_id=spec.growth_job_id,
+                growth_job_start_date=spec.growth_job_start_date,
+                growth_job_end_date=spec.growth_job_end_date,
+                yield_recorded_date=spec.yield_recorded_date,
+                yield_weight=spec.yield_weight,
+                yield_unit=spec.yield_unit,
+                telemetry_measurement_type=telemetry_entry.type,
+                telemetry_measurement_unit=telemetry_entry.unit,
+                telemetry_measurement_value=telemetry_entry.value,
             )
+            dict_writer.writerow(output_row.model_dump(mode="json"))
 
 
 def main() -> None:
@@ -270,14 +288,6 @@ def main() -> None:
         config("MEASUREMENT_UNIT")
     )
 
-    output_dir_path = prepare_for_output(
-        run_id=run_id,
-        config_timestamps=config_timestamps,
-        coalesced_timestamps=coalesced_timestamps,
-        run_timestamp=run_timestamp,
-        telemetry_type_to_fetch=telemetry_type_to_fetch,
-        telemetry_unit_to_fetch=telemetry_unit_to_fetch,
-    )
     from_timestamp = coalesced_timestamps.from_timestamp
     to_timestamp = coalesced_timestamps.to_timestamp
 
@@ -289,6 +299,21 @@ def main() -> None:
         from_timestamp=from_timestamp,
         to_timestamp=to_timestamp,
     )
+
+    output_dir_path = prepare_for_output(
+        run_id=run_id,
+        config_timestamps=config_timestamps,
+        coalesced_timestamps=coalesced_timestamps,
+        run_timestamp=run_timestamp,
+        telemetry_type_to_fetch=telemetry_type_to_fetch,
+        telemetry_unit_to_fetch=telemetry_unit_to_fetch,
+        job_to_output_rows_specs=job_to_output_rows_specs,
+    )
+
+    if not job_to_output_rows_specs:
+        msg = f"No matched yield results and growth jobs found for timestamp range {from_timestamp} to {to_timestamp}"
+        logger.warning(msg)
+        exit(0)
 
     telemetry_bounding_timestamps = get_bounding_timestamps_for_specs(
         job_to_output_rows_specs=job_to_output_rows_specs
@@ -313,13 +338,12 @@ def main() -> None:
         logger.error(msg)
         raise FileExistsError(msg)
     with open(output_file, "w") as file:
-        file.write(
-            "timestamp,crop,growth_job_start_date,growth_job_end_date,yield_recorded_date,yield_weight,yield_unit,telemetry_measurement_type,telemetry_measurement_unit,telemetry_measurement_value\n"
-        )
+        writer = csv.DictWriter(file, fieldnames=output_columns)
+        writer.writeheader()
         for batch in telemetry_batches:
             for telemetry_entry in batch:
                 telemetry_entry_to_output_rows(
-                    output_file=file,
+                    dict_writer=writer,
                     telemetry_entry=telemetry_entry,
                     job_to_output_rows_specs=job_to_output_rows_specs,
                 )
