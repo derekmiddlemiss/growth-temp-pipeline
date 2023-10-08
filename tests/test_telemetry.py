@@ -1,11 +1,12 @@
 from __future__ import annotations
-import datetime
 
 import pyodbc
 import pytest
 from typing import TYPE_CHECKING
 from pydantic import ValidationError
-from growth_job_pipeline.telemetry_db.models import TelemetryEntry
+from growth_job_pipeline.models.validators.telemetry_entry import (
+    TelemetryEntry,
+)
 from growth_job_pipeline.telemetry_db.db import (
     get_row_count,
     get_validated_entries,

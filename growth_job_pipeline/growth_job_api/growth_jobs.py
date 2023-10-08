@@ -9,10 +9,10 @@ import requests
 from typing import TYPE_CHECKING
 
 from growth_job_pipeline.config import config
-from .models import GrowthJob
+from growth_job_pipeline.models.validators.growth_job import GrowthJob
 
 if TYPE_CHECKING:
-    from growth_job_pipeline.shared_models.crop import Crop
+    from growth_job_pipeline.models.enums.crop import Crop
 
 logger = logging.getLogger(__name__)
 

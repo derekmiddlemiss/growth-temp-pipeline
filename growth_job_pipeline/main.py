@@ -6,43 +6,49 @@ import json
 import logging
 import os
 from uuid import uuid4, UUID
-from typing import TYPE_CHECKING, TextIO
+from typing import TYPE_CHECKING
 
 from growth_job_pipeline.config import config
 from growth_job_pipeline.growth_job_api import (
     get_time_filtered_growth_jobs_for_crop,
 )
 from growth_job_pipeline.logger import setup_logger
-from growth_job_pipeline.shared_models.output_row import (
+from growth_job_pipeline.models.validators.output_row import (
     output_columns,
     OutputRow,
 )
 from growth_job_pipeline.telemetry_db import (
-    TelemetryMeasurementUnit,
-    TelemetryMeasurementType,
     telemetry_entries_batcher,
 )
+from growth_job_pipeline.models.enums.telemetry_measurement_unit import (
+    TelemetryMeasurementUnit,
+)
+from growth_job_pipeline.models.enums.telemetry_measurement_type import (
+    TelemetryMeasurementType,
+)
 from growth_job_pipeline.telemetry_db.db import get_telemetry_db_cursor
-from growth_job_pipeline.utils.utils import (
+from growth_job_pipeline.utils import (
     get_config_timestamps,
     coalesce_run_timestamps,
     latest_datetime_possible_for_date,
 )
 from growth_job_pipeline.yield_tsv_reader import get_ascending_yield_results
-from growth_job_pipeline.shared_models.job_to_output_rows_spec import (
+from growth_job_pipeline.models.validators.job_to_output_rows_spec import (
     JobToOutputRowsSpec,
 )
-from growth_job_pipeline.shared_models.coalesced_timestamps import (
+from growth_job_pipeline.models.validators.coalesced_timestamps import (
     CoalescedTimestamps,
 )
 
 if TYPE_CHECKING:
-    from growth_job_pipeline.shared_models.config_timestamps import (
+    from growth_job_pipeline.models.validators.config_timestamps import (
         ConfigTimestamps,
     )
-    from growth_job_pipeline.yield_tsv_reader.models import YieldResult
-    from growth_job_pipeline.growth_job_api.models import GrowthJob
-    from growth_job_pipeline.telemetry_db.models import TelemetryEntry
+    from growth_job_pipeline.models.validators.yield_result import YieldResult
+    from growth_job_pipeline.models.validators.growth_job import GrowthJob
+    from growth_job_pipeline.models.validators.telemetry_entry import (
+        TelemetryEntry,
+    )
 
 logger = logging.getLogger(__name__)
 

@@ -1,9 +1,11 @@
 import pytest
 import datetime
 
-from growth_job_pipeline.telemetry_db import (
-    TelemetryMeasurementType,
+from growth_job_pipeline.models.enums.telemetry_measurement_unit import (
     TelemetryMeasurementUnit,
+)
+from growth_job_pipeline.models.enums.telemetry_measurement_type import (
+    TelemetryMeasurementType,
 )
 
 

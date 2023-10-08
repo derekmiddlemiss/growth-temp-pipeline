@@ -1,16 +1,13 @@
 import datetime
-from enum import Enum
 
 from pydantic import BaseModel, Extra
 
-
-class TelemetryMeasurementType(str, Enum):
-    temp = "temp"
-
-
-class TelemetryMeasurementUnit(str, Enum):
-    C = "C"
-    F = "F"
+from growth_job_pipeline.models.enums.telemetry_measurement_type import (
+    TelemetryMeasurementType,
+)
+from growth_job_pipeline.models.enums.telemetry_measurement_unit import (
+    TelemetryMeasurementUnit,
+)
 
 
 # for now, validation is not conditional, as telemetry DB contains just one type of measurement: "temp"

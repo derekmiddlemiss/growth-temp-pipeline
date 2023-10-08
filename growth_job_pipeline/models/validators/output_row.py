@@ -2,11 +2,13 @@ import datetime
 
 from pydantic import Extra, BaseModel, StrictInt
 
-from growth_job_pipeline.shared_models.crop import Crop
-from growth_job_pipeline.shared_models.weight_unit import WeightUnit
-from growth_job_pipeline.telemetry_db import (
-    TelemetryMeasurementType,
+from growth_job_pipeline.models.enums.crop import Crop
+from growth_job_pipeline.models.enums.weight_unit import WeightUnit
+from growth_job_pipeline.models.enums.telemetry_measurement_unit import (
     TelemetryMeasurementUnit,
+)
+from growth_job_pipeline.models.enums.telemetry_measurement_type import (
+    TelemetryMeasurementType,
 )
 
 output_columns = [
