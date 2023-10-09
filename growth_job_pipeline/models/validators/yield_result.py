@@ -1,6 +1,6 @@
 import datetime
 
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel
 
 from growth_job_pipeline.models.enums.crop import Crop
 from growth_job_pipeline.models.enums.weight_unit import WeightUnit
@@ -24,5 +24,5 @@ class YieldResult(BaseModel):
 
     class Config:
         use_enum_values = True
-        extra = Extra.forbid
+        extra = "forbid"
         frozen = True

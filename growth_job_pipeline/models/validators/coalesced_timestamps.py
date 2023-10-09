@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel
 
 
 class CoalescedTimestamps(BaseModel):
@@ -15,5 +15,5 @@ class CoalescedTimestamps(BaseModel):
     to_timestamp: datetime
 
     class Config:
-        extra = Extra.forbid
+        extra = "forbid"
         frozen = True

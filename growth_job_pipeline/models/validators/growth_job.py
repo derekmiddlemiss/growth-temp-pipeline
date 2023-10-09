@@ -1,6 +1,6 @@
 import datetime
 
-from pydantic import BaseModel, StrictInt, model_validator, Extra
+from pydantic import BaseModel, StrictInt, model_validator
 
 from growth_job_pipeline.models.enums.crop import Crop
 
@@ -33,5 +33,5 @@ class GrowthJob(BaseModel):
 
     class Config:
         use_enum_values = True
-        extra = Extra.forbid
+        extra = "forbid"
         frozen = True

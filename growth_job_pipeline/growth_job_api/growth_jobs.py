@@ -54,6 +54,12 @@ def get_time_filtered_growth_jobs_for_crop(
             f" crop={crop}"
         )
         return filtered_jobs
+    except requests.RequestException as e:
+        logger.error(
+            f"Error: {e}. Cannot fetch growth jobs from"
+            f" {config('GROWTH_JOBS_API_URL')}"
+        )
+        raise e
     except pydantic.ValidationError as e:
         logger.error(f"Error: {e} validating growth jobs.")
         raise e

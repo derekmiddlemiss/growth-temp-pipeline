@@ -1,6 +1,6 @@
 import datetime
 
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel
 
 from growth_job_pipeline.models.enums.telemetry_measurement_type import (
     TelemetryMeasurementType,
@@ -30,5 +30,5 @@ class TelemetryEntry(BaseModel):
 
     class Config:
         use_enum_values = True
-        extra = Extra.forbid
+        extra = "forbid"
         frozen = True

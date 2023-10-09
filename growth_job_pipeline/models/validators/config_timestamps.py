@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel
 
 
 class ConfigTimestamps(BaseModel):
@@ -15,5 +15,5 @@ class ConfigTimestamps(BaseModel):
     to_timestamp: datetime | None
 
     class Config:
-        extra = Extra.forbid
+        extra = "forbid"
         frozen = True

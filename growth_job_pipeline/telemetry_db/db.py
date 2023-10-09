@@ -81,7 +81,7 @@ def get_validated_entries(
         return [TelemetryEntry(**dict(zip(column_names, row))) for row in rows]
     except ValidationError as e:
         logger.error(
-            f"Error: {e} validating telemetry DB rows. Batches"
+            f"Error: {e}. Could not validate telemetry DB rows. Batches"
             f" fetched={num_batches_fetched}"
         )
         raise e
@@ -134,7 +134,7 @@ def telemetry_entries_batcher(
             ]
         except pyodbc.Error as e:
             logger.error(
-                f"Error: {e} fetching batch from telemetry DB. Batches"
+                f"Error: {e}. Could not fetch batch from telemetry DB. Batches"
                 f" fetched={num_batches_fetched}"
             )
             raise e

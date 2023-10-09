@@ -1,6 +1,6 @@
 import datetime
 
-from pydantic import Extra, BaseModel, StrictInt
+from pydantic import BaseModel, StrictInt
 
 from growth_job_pipeline.models.enums.crop import Crop
 from growth_job_pipeline.models.enums.weight_unit import WeightUnit
@@ -57,5 +57,5 @@ class OutputRow(BaseModel):
 
     class Config:
         use_enum_values = True
-        extra = Extra.forbid
+        extra = "forbid"
         frozen = True
