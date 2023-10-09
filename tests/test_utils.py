@@ -5,14 +5,14 @@ import pytest
 from growth_job_pipeline.models.validators.coalesced_timestamps import (
     CoalescedTimestamps,
 )
+from growth_job_pipeline.models.validators.config_timestamps import (
+    ConfigTimestamps,
+)
 from growth_job_pipeline.utils import (
     get_config_timestamps,
     coalesce_run_timestamps,
     split_line_on_whitespace,
     latest_datetime_possible_for_date,
-)
-from growth_job_pipeline.models.validators.config_timestamps import (
-    ConfigTimestamps,
 )
 
 

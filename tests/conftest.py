@@ -1,14 +1,14 @@
+import datetime
 import json
 
 import pytest
-import datetime
 
 from growth_job_pipeline.models.enums.crop import Crop
-from growth_job_pipeline.models.enums.telemetry_measurement_unit import (
-    TelemetryMeasurementUnit,
-)
 from growth_job_pipeline.models.enums.telemetry_measurement_type import (
     TelemetryMeasurementType,
+)
+from growth_job_pipeline.models.enums.telemetry_measurement_unit import (
+    TelemetryMeasurementUnit,
 )
 from growth_job_pipeline.models.enums.weight_unit import WeightUnit
 from growth_job_pipeline.models.validators.growth_job import GrowthJob

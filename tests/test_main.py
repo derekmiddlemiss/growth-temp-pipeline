@@ -11,9 +11,6 @@ from growth_job_pipeline.main import (
 from growth_job_pipeline.models.validators.coalesced_timestamps import (
     CoalescedTimestamps,
 )
-from growth_job_pipeline.models.validators.job_to_output_rows_spec import (
-    JobToOutputRowsSpec,
-)
 from growth_job_pipeline.utils import latest_datetime_possible_for_date
 
 

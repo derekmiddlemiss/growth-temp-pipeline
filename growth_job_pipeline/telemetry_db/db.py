@@ -8,14 +8,14 @@ import pyodbc
 from pydantic import ValidationError
 
 from growth_job_pipeline.config import config
-from growth_job_pipeline.models.validators.telemetry_entry import (
-    TelemetryEntry,
+from growth_job_pipeline.models.enums.telemetry_measurement_type import (
+    TelemetryMeasurementType,
 )
 from growth_job_pipeline.models.enums.telemetry_measurement_unit import (
     TelemetryMeasurementUnit,
 )
-from growth_job_pipeline.models.enums.telemetry_measurement_type import (
-    TelemetryMeasurementType,
+from growth_job_pipeline.models.validators.telemetry_entry import (
+    TelemetryEntry,
 )
 
 logger = logging.getLogger(__name__)

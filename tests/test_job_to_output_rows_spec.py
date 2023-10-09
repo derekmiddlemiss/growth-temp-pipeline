@@ -1,9 +1,6 @@
 import pytest
 from pydantic import ValidationError
 
-from growth_job_pipeline.models.validators.config_timestamps import (
-    ConfigTimestamps,
-)
 from growth_job_pipeline.models.validators.job_to_output_rows_spec import (
     JobToOutputRowsSpec,
 )

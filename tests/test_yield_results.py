@@ -1,5 +1,3 @@
-import datetime
-
 import pytest
 from pydantic import ValidationError
 from pytest_mock import MockerFixture

@@ -1,12 +1,12 @@
 from __future__ import annotations
+
 import datetime
 import logging
+from typing import TYPE_CHECKING
 
 import backoff
 import pydantic
 import requests
-
-from typing import TYPE_CHECKING
 
 from growth_job_pipeline.config import config
 from growth_job_pipeline.models.validators.growth_job import GrowthJob

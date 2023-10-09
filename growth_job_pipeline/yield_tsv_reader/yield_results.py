@@ -1,14 +1,14 @@
-import logging
 import datetime
+import logging
 
 from pydantic import ValidationError
 
 from growth_job_pipeline.config import config
+from growth_job_pipeline.models.validators.yield_result import YieldResult
 from growth_job_pipeline.utils import (
     split_line_on_whitespace,
     latest_datetime_possible_for_date,
 )
-from growth_job_pipeline.models.validators.yield_result import YieldResult
 
 logger = logging.getLogger(__name__)
 

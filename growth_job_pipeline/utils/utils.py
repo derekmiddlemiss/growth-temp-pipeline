@@ -2,11 +2,11 @@ import datetime
 import logging
 
 from growth_job_pipeline.config import config
-from growth_job_pipeline.models.validators.config_timestamps import (
-    ConfigTimestamps,
-)
 from growth_job_pipeline.models.validators.coalesced_timestamps import (
     CoalescedTimestamps,
+)
+from growth_job_pipeline.models.validators.config_timestamps import (
+    ConfigTimestamps,
 )
 
 logger = logging.getLogger(__name__)
