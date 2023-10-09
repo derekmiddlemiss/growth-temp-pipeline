@@ -24,23 +24,30 @@ def get_ascending_yield_results(
     :param to_timestamp: datetime.datetime
     :return: list[YieldResult]
     """
-    with open(config("YIELD_RESULTS_FILE"), "r") as file:
-        column_names = split_line_on_whitespace(file.readline())
-        lines = [split_line_on_whitespace(line) for line in file]
-        try:
-            results = [
-                YieldResult(**dict(zip(column_names, line))) for line in lines
-            ]
-        except ValidationError as e:
-            logger.error(f"Error {e} validating yield results.")
-            raise e
+    try:
+        with open(config("YIELD_RESULTS_FILE"), "r") as file:
+            column_names = split_line_on_whitespace(file.readline())
+            lines = [split_line_on_whitespace(line) for line in file]
 
-        filtered_results = [
-            result
-            for result in results
-            if from_timestamp
-            <= latest_datetime_possible_for_date(result.date)
-            < to_timestamp
+        results = [
+            YieldResult(**dict(zip(column_names, line))) for line in lines
         ]
+    except IOError as e:
+        logger.error(
+            "Cannot read from yield results"
+            f" file={config('YIELD_RESULTS_FILE')}"
+        )
+        raise e
+    except ValidationError as e:
+        logger.error(f"Error {e}. Cannot validate yield results.")
+        raise e
 
-        return sorted(filtered_results, key=lambda result: result.date)
+    filtered_results = [
+        result
+        for result in results
+        if from_timestamp
+        <= latest_datetime_possible_for_date(result.date)
+        < to_timestamp
+    ]
+
+    return sorted(filtered_results, key=lambda result: result.date)
