@@ -1,3 +1,5 @@
+import json
+
 import pytest
 import datetime
 
@@ -10,9 +12,13 @@ from growth_job_pipeline.models.enums.telemetry_measurement_type import (
 )
 from growth_job_pipeline.models.enums.weight_unit import WeightUnit
 from growth_job_pipeline.models.validators.growth_job import GrowthJob
+from growth_job_pipeline.models.validators.job_to_output_rows_spec import (
+    JobToOutputRowsSpec,
+)
 from growth_job_pipeline.models.validators.telemetry_entry import (
     TelemetryEntry,
 )
+from growth_job_pipeline.models.validators.yield_result import YieldResult
 
 
 @pytest.fixture()
@@ -288,38 +294,76 @@ def valid_end_date__job2() -> datetime.datetime:
 
 
 @pytest.fixture()
-def growth_job_1(valid_start_date__job1, valid_end_date__job1) -> GrowthJob:
+def valid_growth_job_id() -> int:
+    """
+    Returns a valid growth_job_id
+    :return: int
+    """
+    return 1
+
+
+@pytest.fixture()
+def valid_growth_job_id2() -> int:
+    """
+    Returns a valid growth_job_id
+    :return: int
+    """
+    return 2
+
+
+@pytest.fixture()
+def growth_job_1(
+    valid_growth_job_id,
+    valid_crop,
+    valid_start_date__job1,
+    valid_end_date__job1,
+) -> GrowthJob:
     """
     Returns a valid growth job
     :return: GrowthJob
     """
     return GrowthJob(
-        id=1,
-        crop="basil",
+        id=valid_growth_job_id,
+        crop=valid_crop,
         start_date=valid_start_date__job1,
         end_date=valid_end_date__job1,
     )
 
 
 @pytest.fixture()
-def growth_job_2(valid_start_date__job2, valid_end_date__job2) -> GrowthJob:
+def growth_job_2(
+    valid_growth_job_id2,
+    valid_crop,
+    valid_start_date__job2,
+    valid_end_date__job2,
+) -> GrowthJob:
     """
     Returns a valid growth job
     :return: GrowthJob
     """
     return GrowthJob(
-        id=2,
-        crop="basil",
+        id=valid_growth_job_id2,
+        crop=valid_crop,
         start_date=valid_start_date__job2,
         end_date=valid_end_date__job2,
     )
 
 
 @pytest.fixture()
-def valid_yield_recorded_date() -> datetime.date:
+def valid_yield_recorded_date__job1() -> datetime.date:
     """
     Returns a valid yield_recorded_date
-    After all valid growth_job_end_dates
+    After valid growth_job_end_dates
+    :return: datetime.date
+    """
+    return datetime.date.fromisoformat("2022-01-12")
+
+
+@pytest.fixture()
+def valid_yield_recorded_date__job2() -> datetime.date:
+    """
+    Returns a valid yield_recorded_date
+    After valid growth_job_end_dates
     :return: datetime.date
     """
     return datetime.date.fromisoformat("2022-01-17")
@@ -336,6 +380,16 @@ def invalid_yield_recorded_date__early() -> datetime.date:
 
 
 @pytest.fixture()
+def invalid_yield_recorded_date__very_late() -> datetime.date:
+    """
+    Returns an invalid yield_recorded_date
+    Out of scope
+    :return: datetime.date
+    """
+    return datetime.date.fromisoformat("2025-01-01")
+
+
+@pytest.fixture()
 def invalid_yield_recorded_date__month_wrong() -> str:
     """
     Returns an invalid yield_recorded_date
@@ -346,18 +400,223 @@ def invalid_yield_recorded_date__month_wrong() -> str:
 
 
 @pytest.fixture()
-def valid_growth_job_id() -> int:
-    """
-    Returns a valid growth_job_id
-    :return: int
-    """
-    return 1
-
-
-@pytest.fixture()
 def invalid_growth_job_id() -> str:
     """
     Returns an invalid growth_job_id
     :return: int
     """
     return "one-ish"
+
+
+@pytest.fixture()
+def yield_result__job1(
+    valid_yield_recorded_date__job1,
+    valid_crop,
+    valid_yield_weight,
+    valid_weight_unit,
+) -> YieldResult:
+    """
+    Returns a valid yield result
+    :param valid_yield_recorded_date__job1:
+    :param valid_crop:
+    :param valid_yield_weight:
+    :param valid_weight_unit:
+    :return: YieldResult
+    """
+
+    return YieldResult(
+        date=valid_yield_recorded_date__job1,
+        crop=valid_crop,
+        weight=valid_yield_weight,
+        unit=valid_weight_unit,
+    )
+
+
+@pytest.fixture()
+def yield_result__job2(
+    valid_yield_recorded_date__job2,
+    valid_crop,
+    valid_yield_weight,
+    valid_weight_unit,
+) -> YieldResult:
+    """
+    Returns a valid yield result
+    :param valid_yield_recorded_date__job2:
+    :param valid_crop:
+    :param valid_yield_weight:
+    :param valid_weight_unit:
+    :return: YieldResult
+    """
+
+    return YieldResult(
+        date=valid_yield_recorded_date__job2,
+        crop=valid_crop,
+        weight=valid_yield_weight,
+        unit=valid_weight_unit,
+    )
+
+
+@pytest.fixture()
+def yield_result__trouble_early(
+    invalid_yield_recorded_date__early,
+    valid_crop,
+    valid_yield_weight,
+    valid_weight_unit,
+) -> YieldResult:
+    """
+    Returns a valid yield result
+    :param invalid_yield_recorded_date__early
+    :param valid_crop:
+    :param valid_yield_weight:
+    :param valid_weight_unit:
+    :return: YieldResult
+    """
+
+    return YieldResult(
+        date=invalid_yield_recorded_date__early,
+        crop=valid_crop,
+        weight=valid_yield_weight,
+        unit=valid_weight_unit,
+    )
+
+
+@pytest.fixture()
+def yield_result__trouble_late(
+    invalid_yield_recorded_date__very_late,
+    valid_crop,
+    valid_yield_weight,
+    valid_weight_unit,
+) -> YieldResult:
+    """
+    Returns a valid yield result
+    :param invalid_yield_recorded_date__very_late:
+    :param valid_crop:
+    :param valid_yield_weight:
+    :param valid_weight_unit:
+    :return: YieldResult
+    """
+
+    return YieldResult(
+        date=invalid_yield_recorded_date__very_late,
+        crop=valid_crop,
+        weight=valid_yield_weight,
+        unit=valid_weight_unit,
+    )
+
+
+@pytest.fixture()
+def yield_result__very_late(
+    invalid_yield_recorded_date__early,
+    valid_crop,
+    valid_yield_weight,
+    valid_weight_unit,
+) -> YieldResult:
+    """
+    Returns a valid yield result
+    :param invalid_yield_recorded_date__early
+    :param valid_crop:
+    :param valid_yield_weight:
+    :param valid_weight_unit:
+    :return: YieldResult
+    """
+
+    return YieldResult(
+        date=invalid_yield_recorded_date__early,
+        crop=valid_crop,
+        weight=valid_yield_weight,
+        unit=valid_weight_unit,
+    )
+
+
+@pytest.fixture()
+def job_to_output_rows_spec(
+    valid_crop,
+    valid_growth_job_id,
+    valid_start_date__job1,
+    valid_end_date__job1,
+    valid_yield_recorded_date__job1,
+    valid_yield_weight,
+    valid_weight_unit,
+) -> JobToOutputRowsSpec:
+    """
+    Returns a valid job_to_output_rows_spec
+    :param valid_crop:
+    :param valid_growth_job_id:
+    :param valid_start_date__job1
+    :param valid_end_date__job1:
+    :param valid_yield_recorded_date__job1:
+    :param valid_yield_weight:
+    :param valid_weight_unit:
+    :return: JobToOutputRowsSpec
+    """
+    return JobToOutputRowsSpec(
+        crop=valid_crop,
+        growth_job_id=valid_growth_job_id,
+        growth_job_start_date=valid_start_date__job1,
+        growth_job_end_date=valid_end_date__job1,
+        yield_recorded_date=valid_yield_recorded_date__job1,
+        yield_weight=valid_yield_weight,
+        yield_unit=valid_weight_unit,
+    )
+
+
+@pytest.fixture()
+def job_to_output_rows_spec2(
+    valid_crop,
+    valid_growth_job_id2,
+    valid_start_date__job2,
+    valid_end_date__job2,
+    valid_yield_recorded_date__job2,
+    valid_yield_weight,
+    valid_weight_unit,
+) -> JobToOutputRowsSpec:
+    """
+    Returns a valid job_to_output_rows_spec
+    :param valid_crop:
+    :param valid_growth_job_id2:
+    :param valid_start_date__job2
+    :param valid_end_date__job2:
+    :param valid_yield_recorded_date__job2:
+    :param valid_yield_weight:
+    :param valid_weight_unit:
+    :return: JobToOutputRowsSpec
+    """
+    return JobToOutputRowsSpec(
+        crop=valid_crop,
+        growth_job_id=valid_growth_job_id2,
+        growth_job_start_date=valid_start_date__job2,
+        growth_job_end_date=valid_end_date__job2,
+        yield_recorded_date=valid_yield_recorded_date__job2,
+        yield_weight=valid_yield_weight,
+        yield_unit=valid_weight_unit,
+    )
+
+
+@pytest.fixture()
+def json_str_valid(
+    valid_crop,
+    valid_start_date__job1,
+    valid_end_date__job1,
+    valid_start_date__job2,
+    valid_end_date__job2,
+) -> str:
+    """
+    Returns a json string
+    :return: str
+    """
+    return json.dumps(
+        [
+            {
+                "id": 1,
+                "crop": valid_crop,
+                "start_date": valid_start_date__job1.isoformat(),
+                "end_date": valid_end_date__job1.isoformat(),
+            },
+            {
+                "id": 2,
+                "crop": valid_crop,
+                "start_date": valid_start_date__job2.isoformat(),
+                "end_date": valid_end_date__job2.isoformat(),
+            },
+        ]
+    )

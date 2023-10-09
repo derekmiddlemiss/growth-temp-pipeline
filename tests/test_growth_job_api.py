@@ -10,36 +10,6 @@ from growth_job_pipeline.growth_job_api import (
 
 
 @pytest.fixture()
-def json_str_valid(
-    valid_crop,
-    valid_start_date__job1,
-    valid_end_date__job1,
-    valid_start_date__job2,
-    valid_end_date__job2,
-) -> str:
-    """
-    Returns a json string
-    :return: str
-    """
-    return json.dumps(
-        [
-            {
-                "id": 1,
-                "crop": valid_crop,
-                "start_date": valid_start_date__job1.isoformat(),
-                "end_date": valid_end_date__job1.isoformat(),
-            },
-            {
-                "id": 2,
-                "crop": valid_crop,
-                "start_date": valid_start_date__job2.isoformat(),
-                "end_date": valid_end_date__job2.isoformat(),
-            },
-        ]
-    )
-
-
-@pytest.fixture()
 def json_str_invalid(
     invalid_crop, valid_start_date__job1, valid_end_date__job1
 ) -> str:

@@ -160,8 +160,8 @@ def match_yield_results_growth_jobs_gen_specs(
                 msg = (
                     "Cannot unambiguously assign yield"
                     f" result={this_yield_result} to a single growth job. Num"
-                    " growth jobs found since last yield"
-                    f" result={len(candidate_growth_jobs)}"
+                    " growth jobs found search back minus"
+                    f" {MAX_DELAY_DAYS_SEARCH} days={len(candidate_growth_jobs)}"
                 )
                 logger.error(msg)
                 raise RuntimeError(msg)
