@@ -40,7 +40,7 @@ exclude = '''
 )/
 '''
 
-[tool.poetry_bumpversion.file."src/__init__.py"]
+[tool.poetry_bumpversion.file."growth_job_pipeline/__init__.py"]
 
 [build-system]
 requires = ["poetry-core"]
