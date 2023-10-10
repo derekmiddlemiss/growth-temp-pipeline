@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "growth-job-pipeline"
-version = "0.1.1"
+version = "0.1.2"
 description = "A data pipeline to integrate growth temperatures with growth run and yield data"
 authors = ["Del Middlemiss <derekmiddlemiss@gmail.com>"]
 readme = "README.md"
