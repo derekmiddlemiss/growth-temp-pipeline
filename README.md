@@ -35,7 +35,7 @@ The following environment variables are available to configure the pipeline:
 
 | Variable                | Required | Options                | Default   |
 |-------------------------|----------|------------------------|-----------|
-| `DEPLOY_ENIRONMENT`     | No       | `staging`, `production` | `staging` |
+| `DEPLOY_ENVIRONMENT`    | No       | `staging`, `production` | `staging` |
 | `OUTPUT_DIR`            | Yes      |                        | None      |
 | `YIELD_RESULTS_FILE`    | Yes      |                        | None      |
 | `TELEMETRY_DB_USERNAME` | Yes      |                        | None      |
@@ -50,6 +50,8 @@ the pipeline can be extended to support other measurement types and units.
 
 The pipeline has been tested with python3.11. To install:
 
+* Installation of the MS-SQL Server drivers may be needed: see instructions at
+https://learn.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server
 * Install the `poetry` build tool and package manager (see up to date instructions at
 https://python-poetry.org/docs/#installation), currently `curl -sSL https://install.python-poetry.org | python3 -`
 * Test `poetry` is installed correctly by running `poetry --version`
@@ -58,12 +60,12 @@ https://python-poetry.org/docs/#installation), currently `curl -sSL https://inst
 can either set the environment variables in your shell or prepend them to the command above, e.g. `OUTPUT_DIR=/tmp poetry run python -m growth_job_pipeline.main`)
 
 For development work:
-* A `precommit` config is provided for use with `pre-commit` (https://pre-commit.com/)
-* Test coverage and quality are monitored by GitHub workflows. Direct push to `main` is blocked,
+* A `.pre-commit-config.yaml` config is provided for use with `pre-commit` (https://pre-commit.com/)
+* Test coverage and quality are monitored by GitHub workflows. Direct push to `main` is not allowed,
 go via branches and PRs.
 
 ## TODOs
-* Suggest to plant scientists they start to record the growth job id in the
-  yield results file
-* Dockerize the pipeline
+* Suggest to plant scientists they start to record the `growth_job_id` in the
+  yield results file, this would make matching yield results to growth jobs exact
+* Dockerize the pipeline to avoid the need to install the MS-SQL Server drivers
 * Complete unit tests for validators
