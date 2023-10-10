@@ -244,6 +244,7 @@ def write_run_data(
     """
 
     run_data = {
+        "deploy_environment": config("DEPLOY_ENVIRONMENT"),
         "run_id": str(run_id),
         "run_timestamp": run_timestamp.isoformat(),
         "telemetry_measurement_type": telemetry_type_to_fetch.value,
