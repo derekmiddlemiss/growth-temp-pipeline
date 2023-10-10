@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+env:
+  COVERAGE_THRESHOLD: 80
+
 jobs:
   quality:
     runs-on: ubuntu-latest
@@ -34,9 +37,9 @@ jobs:
         shell: bash
         run: poetry run flake8
 
-      - name: Run unit tests
+      - name: Run unit tests with coverage
         shell: bash
-        run: poetry run pytest
+        run: poetry run pytest --cov=growth_job_pipeline --cov-fail-under $COVERAGE_THRESHOLD
 
   bump-version-tag:
     runs-on: ubuntu-latest

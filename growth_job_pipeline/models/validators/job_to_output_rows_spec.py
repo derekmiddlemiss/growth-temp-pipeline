@@ -33,7 +33,7 @@ class JobToOutputRowsSpec(BaseModel):
         """
         Validates that growth_job_end_date is after growth_job_start_date
         Validates that yield_recorded_date is feasible given growth_job_end_date
-        :return: GrowthJob
+        :return: JobToOutputRowsSpec
         """
         if self.growth_job_end_date <= self.growth_job_start_date:
             raise ValueError(f"end_date equal to or before start_date: {self}")
