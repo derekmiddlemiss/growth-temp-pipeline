@@ -204,7 +204,7 @@ def setup_run_output_dir(
     :return: str
     """
 
-    output_dir_path = config("OUTPUT_DIR")
+    output_dir_path = config("OUTPUT_DIR", default="/growth_job_pipeline_data")
     if not os.path.exists(output_dir_path):
         os.makedirs(output_dir_path)
 

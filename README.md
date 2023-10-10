@@ -28,23 +28,37 @@ A separate directory labelled by a unique job id and run timestamp is created fo
 * All yield results are read from the file - it's assumed that plant scientists will append to this file but not delete
   (__important__: yield result to growth job matching will fail if previous yield results are deleted)
 * Place minimal strain on the telemetry DB by pulling telemetry entries in batches. Ditto, place minimal
-    strain on the growth jobs API by pulling growth jobs as needed from the API
+    strain on the growth jobs API by pulling growth jobs as needed from the API. Note
+    that for the latter, the API currently does not provide an endpoint or query params
+    allowing requests to filter by `crop`, `growth_job_start_date` and `growth_job_end_date` so no
+    efficiencies result, as all growth jobs are pulled then filtered (TODO added).
+* FROM_TIMESTAMP and TO_TIMESTAMP environment variables can be used to run the pipeline in
+  windowed mode as a periodic job: they are used to filter yield results on which matching
+  then proceeds. If not set, all available yield results are processed.
 
 ## Usage
 The following environment variables are available to configure the pipeline:
 
-| Variable                | Required | Options                | Default   |
-|-------------------------|----------|------------------------|-----------|
-| `DEPLOY_ENVIRONMENT`    | No       | `staging`, `production` | `staging` |
-| `OUTPUT_DIR`            | Yes      |                        | None      |
-| `YIELD_RESULTS_FILE`    | Yes      |                        | None      |
-| `TELEMETRY_DB_USERNAME` | Yes      |                        | None      |
-| `TELEMETRY_DB_PASSWORD` | Yes      |                        | None      |
-| `MEASUREMENT_TYPE`      | Yes      | `temp`                  | None      |
-| `MEASUREMENT_UNIT`      | Yes      | `C`, `F`                | None      |
+| Variable                | Required | Options                | Default                    |
+|-------------------------|----------|------------------------|----------------------------|
+| `DEPLOY_ENVIRONMENT`    | No       | `staging`, `production` | `staging`                  |
+| `OUTPUT_DIR`            | No       |                        | `growth_job_pipeline_data` |
+| `FROM_TIMESTAMP`        | No       |                        | `datetime.datetime.min`    |
+| `TO_TIMESTAMP`          | No       |                        | `datetime.datetime.max`    |
+| `YIELD_RESULTS_FILE`    | Yes      |                        | None                       |
+| `TELEMETRY_DB_USERNAME` | Yes      |                        | None                       |
+| `TELEMETRY_DB_PASSWORD` | Yes      |                        | None                       |
+| `MEASUREMENT_TYPE`      | Yes      | `temp`                  | None                       |
+| `MEASUREMENT_UNIT`      | Yes      | `C`, `F`                | None                       |
 
 Currently only temperature measurements are supported in the telemetry DB, but
-the pipeline can be extended to support other measurement types and units.
+the pipeline can be extended to support other measurement types and units. In the Dockerized
+run, `OUTPUT_DIR` should be set as the container mount point set in the `docker run` command
+
+The config variable `MAX_DAYS_DELAY_GROWTH_JOB_YIELD_RESULT` is set in the code to 180 days.
+This represents the longest permitted delay from the end of a growth job to the yield result being
+logged, and should aid efficient matching if the suggested changes to the API are made. Storing
+growth ids with yield results would remove the need for this setting.
 
 ## Installation and running
 
@@ -67,5 +81,8 @@ go via branches and PRs.
 ## TODOs
 * Suggest to plant scientists they start to record the `growth_job_id` in the
   yield results file, this would make matching yield results to growth jobs exact
+* Discuss with API developers the efficiencies that could result by implementing
+  endpoints or query params that allow filtering growth jobs by crop, start date and
+  end date
 * Dockerize the pipeline to avoid the need to install the MS-SQL Server drivers
 * Complete unit tests for validators
