@@ -30,7 +30,7 @@ RUN apt-get update \
 ENV PATH="$PATH:/opt/mssql-tools18/bin"
 RUN apt-get install -y unixodbc-dev libgssapi-krb5-2
 
-ENV VIRTUAL_ENV=/app/.venv PATH="/app/.venv/bin:$PATH"
+ENV VIRTUAL_ENV=/pipeline/.venv PATH="/pipeline/.venv/bin:$PATH"
 
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
