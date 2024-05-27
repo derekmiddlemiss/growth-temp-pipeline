@@ -3,7 +3,7 @@
 A pipeline to pull yield results from a local TSV file (headers `date`,
 `crop`, `weight` `unit`) and match them to growth job results pulled from
 the growth jobs API (endpoint `/jobs`). Matching is inexact as yield results
-do not include the `id` of the gorwth job they correspond to. Instead, the
+do not include the `id` of the growth job they correspond to. Instead, the
 matching is done by date and crop, raising an error if ambiguous matches
 result. Telemetry entries corresponding to the requested telemetry measurement
 type and unit (e.g. `temp`, `C`) are then pulled in batches from the telemetry
